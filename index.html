@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioTradutor DNA | Conversor de DNA, RNA & Proteínas</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
+
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7faff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex-grow: 1;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a5b4fc;
+        }
+
+        .view {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .hidden-view {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body class="text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-20 border-b">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🧬</span>
+                    <h1 class="text-xl font-bold text-gray-900">BioTradutor DNA</h1>
+                </div>
+                <h2 class="text-sm font-semibold text-indigo-600 hidden sm:block">Conversor de DNA, RNA & Proteínas</h2>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow:1">
+        <div class="flex flex-col lg:flex-row gap-8">
+
+            <!-- Sidebar -->
+            <nav class="lg:w-1/4 xl:w-1/5">
+                <div class="p-4 bg-white rounded-xl shadow-sm border space-y-2">
+                    <button id="btn-converter"
+                        class="w-full text-left font-semibold p-3 rounded-lg hover:bg-indigo-50 text-gray-700 transition-colors">
+                        Conversor
+                    </button>
+                    <button id="btn-tables"
+                        class="w-full text-left font-semibold p-3 rounded-lg hover:bg-indigo-50 text-gray-700 transition-colors">
+                        Tabelas
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Display Area -->
+            <div id="display-area" class="w-full lg:w-3/4 xl:w-4/5 relative">
+
+                <!-- Default View -->
+                <div id="view-default"
+                    class="view flex items-center justify-center h-full min-h-[500px] bg-white rounded-xl shadow-sm border p-8 text-center">
+                    <div>
+                        <span class="text-6xl">🔬</span>
+                        <h3 class="mt-4 text-2xl font-bold text-gray-900">Bem-vindo ao BioTradutor DNA</h3>
+                        <p class="mt-2 text-gray-500">Selecione uma ferramenta no menu ao lado para começar.</p>
+                    </div>
+                </div>
+
+                <!-- Converter View -->
+                <div id="view-converter" class="view hidden-view w-full">
+                    <div class="bg-white rounded-xl shadow-sm border p-6 md:p-8 space-y-8 height-full">
+                        <div class="text-center">
+                            <h3 class="text-2xl font-bold text-gray-900">Conversor de Sequências</h3>
+                            <p class="text-gray-500 mt-1">Transcreva, traduza e visualize suas sequências biológicas.
+                            </p>
+                        </div>
+
+                        <div class="w-full max-w-2xl mx-auto space-y-4">
+                            <div>
+                                <label for="converter-input-1" class="font-semibold text-gray-600 text-sm">Sequência
+                                    1</label>
+                                <textarea id="converter-input-1" rows="3"
+                                    placeholder="Insira sua sequência de DNA ou RNA aqui... (Ex: ATGCGT...)"
+                                    class="mt-1 w-full p-4 text-base bg-gray-50 rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                            </div>
+                            <div id="compare-container" class="hidden">
+                                <label for="converter-input-2" class="font-semibold text-gray-600 text-sm">Sequência 2
+                                    (Comparação)</label>
+                                <textarea id="converter-input-2" rows="3"
+                                    placeholder="Insira a segunda sequência para comparar..."
+                                    class="mt-1 w-full p-4 text-base bg-gray-50 rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                            </div>
+                            <button id="btn-add-sequence"
+                                class="text-sm text-indigo-600 font-semibold hover:underline">+ Comparar
+                                Sequência</button>
+                            <p id="converter-output" class="text-center text-sm font-semibold h-6 mt-2"></p>
+                        </div>
+
+                        <div class="flex justify-center flex-wrap gap-3">
+                            <button onclick="app.runConversion('rna')"
+                                class="bg-indigo-600 text-white font-semibold py-2 px-5 rounded-lg shadow-sm hover:bg-indigo-700 transition-all">Transcrição
+                                (DNA &rarr; RNA)</button>
+                            <button onclick="app.runConversion('dna')"
+                                class="bg-indigo-600 text-white font-semibold py-2 px-5 rounded-lg shadow-sm hover:bg-indigo-700 transition-all">Transcrição
+                                Reversa (RNA &rarr; DNA)</button>
+                            <button onclick="app.runConversion('prot')"
+                                class="bg-green-600 text-white font-semibold py-2 px-5 rounded-lg shadow-sm hover:bg-green-700 transition-all">Tradução
+                                (RNA &rarr; Proteína)</button>
+                        </div>
+
+                        <div id="result-display" class="pt-8 border-t">
+                            <!-- Results  -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tables View -->
+                <div id="view-tables" class="view hidden-view w-full">
+                    <div class="bg-white rounded-xl shadow-sm border p-6 md:p-8 space-y-8">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900">Tabelas de Referência</h3>
+                                <p class="text-gray-500 mt-1">Consulte bases nitrogenadas e a tabela de códons.</p>
+                            </div>
+                            <div class="flex-shrink-0 flex gap-2 p-1 bg-gray-100 rounded-lg">
+                                <button id="table-btn-bases" onclick="app.renderBasesTable()"
+                                    class="py-1.5 px-4 text-sm font-semibold rounded-md transition-colors">Bases</button>
+                                <button id="table-btn-amino" onclick="app.renderAminoTable()"
+                                    class="py-1.5 px-4 text-sm font-semibold rounded-md transition-colors">Aminoácidos</button>
+                            </div>
+                        </div>
+                        <div id="table-content" class="pt-8 border-t">
+                            <!-- Table content -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto py-10 px-6 text-center md:text-left">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-xl font-bold mb-1">GiB²C - UFF</h3>
+                    <p class="text-sm text-gray-400">Ferramenta educacional para biologia molecular.</p>
+                </div>
+                <div class="flex gap-6 mb-6 md:mb-0">
+                    <a href="https://gib2c.uff.br/" target="_blank" rel="noopener noreferrer"
+                        class="hover:text-indigo-400 transition-colors text-sm">Equipe</a>
+                    <a href="https://www.instagram.com/gib2c/" target="_blank" rel="noopener noreferrer"
+                        class="hover:text-indigo-400 transition-colors text-sm">Instagram</a>
+                    <!-- <a href="#" class="hover:text-indigo-400 transition-colors text-sm">Privacidade</a> -->
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-700 text-center text-xs text-gray-500">
+                <p>&copy; 2024 GiB²C - UFF | Desenvolvido para fins educacionais.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const app = {
+            //  STATE 
+            activeView: 'default',
+            activeTable: 'bases',
+            isCompareMode: false,
+
+            //  DATA 
+            codonMap: {
+                'UUU': { name: 'Fenilalanina', group: 'Apolar' }, 'UUC': { name: 'Fenilalanina', group: 'Apolar' },
+                'UUA': { name: 'Leucina', group: 'Apolar' }, 'UUG': { name: 'Leucina', group: 'Apolar' },
+                'UCU': { name: 'Serina', group: 'Polar' }, 'UCC': { name: 'Serina', group: 'Polar' },
+                'UCA': { name: 'Serina', group: 'Polar' }, 'UCG': { name: 'Serina', group: 'Polar' },
+                'UAU': { name: 'Tirosina', group: 'Polar' }, 'UAC': { name: 'Tirosina', group: 'Polar' },
+                'UAA': { name: 'Parada', group: 'Parada' }, 'UAG': { name: 'Parada', group: 'Parada' },
+                'UGU': { name: 'Cisteína', group: 'Polar' }, 'UGC': { name: 'Cisteína', group: 'Polar' },
+                'UGA': { name: 'Parada', group: 'Parada' }, 'UGG': { name: 'Triptofano', group: 'Apolar' },
+                'CUU': { name: 'Leucina', group: 'Apolar' }, 'CUC': { name: 'Leucina', group: 'Apolar' },
+                'CUA': { name: 'Leucina', group: 'Apolar' }, 'CUG': { name: 'Leucina', group: 'Apolar' },
+                'CCU': { name: 'Prolina', group: 'Apolar' }, 'CCC': { name: 'Prolina', group: 'Apolar' },
+                'CCA': { name: 'Prolina', group: 'Apolar' }, 'CCG': { name: 'Prolina', group: 'Apolar' },
+                'CAU': { name: 'Histidina', group: 'Básico' }, 'CAC': { name: 'Histidina', group: 'Básico' },
+                'CAA': { name: 'Glutamina', group: 'Polar' }, 'CAG': { name: 'Glutamina', group: 'Polar' },
+                'CGU': { name: 'Arginina', group: 'Básico' }, 'CGC': { name: 'Arginina', group: 'Básico' },
+                'CGA': { name: 'Arginina', group: 'Básico' }, 'CGG': { name: 'Arginina', group: 'Básico' },
+                'AUU': { name: 'Isoleucina', group: 'Apolar' }, 'AUC': { name: 'Isoleucina', group: 'Apolar' },
+                'AUA': { name: 'Isoleucina', group: 'Apolar' }, 'AUG': { name: 'Metionina', group: 'Apolar' },
+                'ACU': { name: 'Treonina', group: 'Polar' }, 'ACC': { name: 'Treonina', group: 'Polar' },
+                'ACA': { name: 'Treonina', group: 'Polar' }, 'ACG': { name: 'Treonina', group: 'Polar' },
+                'AAU': { name: 'Asparagina', group: 'Polar' }, 'AAC': { name: 'Asparagina', group: 'Polar' },
+                'AAA': { name: 'Lisina', group: 'Básico' }, 'AAG': { name: 'Lisina', group: 'Básico' },
+                'AGU': { name: 'Serina', group: 'Polar' }, 'AGC': { name: 'Serina', group: 'Polar' },
+                'AGA': { name: 'Arginina', group: 'Básico' }, 'AGG': { name: 'Arginina', group: 'Básico' },
+                'GUU': { name: 'Valina', group: 'Apolar' }, 'GUC': { name: 'Valina', group: 'Apolar' },
+                'GUA': { name: 'Valina', group: 'Apolar' }, 'GUG': { name: 'Valina', group: 'Apolar' },
+                'GCU': { name: 'Alanina', group: 'Apolar' }, 'GCC': { name: 'Alanina', group: 'Apolar' },
+                'GCA': { name: 'Alanina', group: 'Apolar' }, 'GCG': { name: 'Alanina', group: 'Apolar' },
+                'GAU': { name: 'Ácido Aspártico', group: 'Ácido' }, 'GAC': { name: 'Ácido Aspártico', group: 'Ácido' },
+                'GAA': { name: 'Ácido Glutâmico', group: 'Ácido' }, 'GAG': { name: 'Ácido Glutâmico', group: 'Ácido' },
+                'GGU': { name: 'Glicina', group: 'Apolar' }, 'GGC': { name: 'Glicina', group: 'Apolar' },
+                'GGA': { name: 'Glicina', group: 'Apolar' }, 'GGG': { name: 'Glicina', group: 'Apolar' }
+            },
+
+            //  DOM ELEMENTS 
+            elements: {
+                views: {
+                    default: document.getElementById('view-default'),
+                    converter: document.getElementById('view-converter'),
+                    tables: document.getElementById('view-tables'),
+                },
+                navButtons: {
+                    converter: document.getElementById('btn-converter'),
+                    tables: document.getElementById('btn-tables'),
+                },
+                converter: {
+                    input1: document.getElementById('converter-input-1'),
+                    input2: document.getElementById('converter-input-2'),
+                    output: document.getElementById('converter-output'),
+                    resultDisplay: document.getElementById('result-display'),
+                    compareContainer: document.getElementById('compare-container'),
+                    addSequenceBtn: document.getElementById('btn-add-sequence'),
+                },
+                tables: {
+                    content: document.getElementById('table-content'),
+                    btnBases: document.getElementById('table-btn-bases'),
+                    btnAmino: document.getElementById('table-btn-amino'),
+                }
+            },
+
+            //  INITIALIZATION 
+            init() {
+                this.addEventListeners();
+                this.showView('default');
+            },
+
+            //  EVENT LISTENERS 
+            addEventListeners() {
+                this.elements.navButtons.converter.addEventListener('click', () => this.showView('converter'));
+                this.elements.navButtons.tables.addEventListener('click', () => {
+                    this.showView('tables');
+                    this.renderBasesTable();
+                });
+                this.elements.converter.addSequenceBtn.addEventListener('click', () => this.toggleCompareMode());
+            },
+
+            //  UI LOGIC 
+            showView(viewName) {
+                if (this.activeView === viewName) return;
+                this.activeView = viewName;
+
+                Object.values(this.elements.views).forEach(view => view.classList.add('hidden-view'));
+                this.elements.views[viewName].classList.remove('hidden-view');
+
+                Object.values(this.elements.navButtons).forEach(btn => btn.classList.remove('bg-indigo-100', 'text-indigo-700'));
+                if (this.elements.navButtons[viewName]) {
+                    this.elements.navButtons[viewName].classList.add('bg-indigo-100', 'text-indigo-700');
+                }
+
+                this.clearConverter();
+            },
+
+            toggleCompareMode() {
+                this.isCompareMode = !this.isCompareMode;
+                this.elements.converter.compareContainer.classList.toggle('hidden');
+                this.elements.converter.addSequenceBtn.textContent = this.isCompareMode ? '- Remover Comparação' : '+ Comparar Sequência';
+                if (!this.isCompareMode) {
+                    this.elements.converter.input2.value = '';
+                }
+            },
+
+            clearConverter() {
+                this.elements.converter.input1.value = '';
+                this.elements.converter.input2.value = '';
+                this.elements.converter.output.textContent = '';
+                this.elements.converter.resultDisplay.innerHTML = '';
+            },
+
+            displayMessage(message, type = 'error') {
+                const colorClass = type === 'error' ? 'text-red-500' : 'text-green-600';
+                this.elements.converter.output.textContent = message;
+                this.elements.converter.output.className = `text-center text-sm font-semibold h-6 mt-2 ${colorClass}`;
+            },
+
+            //  CONVERSION LOGIC 
+            validateInput(text) {
+                const cleanedText = text.replace(/[^ATUCG]/gi, '').toUpperCase();
+                if (cleanedText.length === 0) return { error: "Entrada vazia ou com caracteres inválidos!" };
+                if (cleanedText.length % 3 !== 0) return { error: "A quantidade de bases deve ser múltipla de 3." };
+                return { value: cleanedText };
+            },
+
+            runConversion(type) {
+                const input1 = this.elements.converter.input1.value;
+                const res1 = this.processSequence(input1, type);
+                if (res1.error) {
+                    this.displayMessage(res1.error);
+                    return;
+                }
+
+                let res2 = null;
+                if (this.isCompareMode) {
+                    const input2 = this.elements.converter.input2.value;
+                    if (input2.trim() !== '') {
+                        res2 = this.processSequence(input2, type);
+                        if (res2.error) {
+                            this.displayMessage(`Erro na Sequência 2: ${res2.error}`);
+                            return;
+                        }
+                    }
+                }
+
+                this.displayMessage("Conversão concluída!", 'success');
+                this.renderResults(res1, res2, type);
+            },
+
+            processSequence(input, type) {
+                const validation = this.validateInput(input);
+                if (validation.error) return validation;
+                const sequence = validation.value;
+
+                switch (type) {
+                    case 'rna': {
+                        let rna = '';
+                        const map = { 'T': 'A', 'A': 'U', 'C': 'G', 'G': 'C' };
+                        for (const base of sequence) {
+                            if (!map[base]) return { error: `Base de DNA inválida: ${base}` };
+                            rna += map[base];
+                        }
+                        return { value: rna, type: 'RNA' };
+                    }
+                    case 'dna': {
+                        let dna = '';
+                        const map = { 'U': 'A', 'A': 'T', 'C': 'G', 'G': 'C' };
+                        for (const base of sequence) {
+                            if (!map[base]) return { error: `Base de RNA inválida: ${base}` };
+                            dna += map[base];
+                        }
+                        return { value: dna, type: 'DNA' };
+                    }
+                    case 'prot': {
+                        if (/[T]/.test(sequence)) return { error: "Apenas RNA pode ser traduzido." };
+                        const proteins = [];
+                        for (let i = 0; i < sequence.length; i += 3) {
+                            const codon = sequence.substring(i, i + 3);
+                            proteins.push(this.codonMap[codon] || { name: 'Desconhecido', group: 'Parada' });
+                        }
+                        return { value: proteins, type: 'Proteína' };
+                    }
+                }
+            },
+
+            //  DRAWING LOGIC 
+            renderResults(res1, res2, type) {
+                const hasComparison = res2 && res2.value;
+                let html = `<div class="grid ${hasComparison ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-8">`;
+
+                html += `<div>${this.getRenderedHtml(res1, type, 1)}</div>`;
+                if (hasComparison) {
+                    html += `<div>${this.getRenderedHtml(res2, type, 2)}</div>`;
+                }
+
+                html += `</div>`;
+                this.elements.converter.resultDisplay.innerHTML = html;
+            },
+
+            getRenderedHtml(result, type, seqNumber) {
+                const title = `Resultado ${seqNumber}: Sequência de ${result.type}`;
+                if (type === 'prot') {
+                    return this.drawProt(result.value, title);
+                } else {
+                    return this.drawAcid(result.value, result.type, title);
+                }
+            },
+
+            drawAcid(sequence, type, title) {
+                const baseColors = {
+                    'A': 'bg-red-400 text-red-900', 'T': 'bg-yellow-400 text-yellow-900',
+                    'U': 'bg-pink-400 text-pink-900', 'C': 'bg-blue-400 text-blue-900',
+                    'G': 'bg-green-400 text-green-900'
+                };
+                const complementMap = type === 'RNA'
+                    ? { 'A': 'U', 'U': 'A', 'C': 'G', 'G': 'C' }
+                    : { 'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C' };
+
+                let html = `<h4 class="text-lg font-bold text-center mb-4">${title}</h4><div class="max-w-xs mx-auto space-y-2">`;
+                sequence.split('').forEach(base => {
+                    const complementBase = complementMap[base];
+                    html += `
+                <div class="flex items-center justify-center gap-2">
+                    <div class="w-10 h-10 flex items-center justify-center font-mono font-bold rounded-lg ${baseColors[base]}">${base}</div>
+                    <div class="w-4 h-1 bg-gray-300"></div>
+                    <div class="w-10 h-10 flex items-center justify-center font-mono font-bold rounded-lg ${baseColors[complementBase]}">${complementBase}</div>
+                </div>
+            `;
+                });
+                html += `</div>`;
+                return html;
+            },
+
+            drawProt(proteins, title) {
+                const groupColors = {
+                    'Apolar': 'bg-yellow-100 text-yellow-800 border-yellow-300', 'Polar': 'bg-green-100 text-green-800 border-green-300',
+                    'Básico': 'bg-blue-100 text-blue-800 border-blue-300', 'Ácido': 'bg-red-100 text-red-800 border-red-300',
+                    'Parada': 'bg-gray-200 text-gray-800 border-gray-400',
+                };
+
+                let html = `<h4 class="text-lg font-bold text-center mb-4">${title}</h4><div class="flex flex-wrap justify-center gap-2">`;
+                proteins.forEach(protein => {
+                    const color = groupColors[protein.group] || 'bg-gray-200';
+                    html += `<span class="py-1 px-3 text-sm font-semibold rounded-full border ${color}">${protein.name}</span>`;
+                });
+                html += `</div>`;
+                return html;
+            },
+
+            //  TABLE RENDERING 
+            updateTableNav(activeTable) {
+                this.activeTable = activeTable;
+                const { btnBases, btnAmino } = this.elements.tables;
+                btnBases.classList.toggle('bg-white', activeTable === 'bases');
+                btnBases.classList.toggle('bg-gray-100', activeTable !== 'bases');
+                btnAmino.classList.toggle('bg-white', activeTable === 'amino');
+                btnAmino.classList.toggle('bg-gray-100', activeTable !== 'amino');
+            },
+
+            renderBasesTable() {
+                this.updateTableNav('bases');
+                this.elements.tables.content.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h4 class="font-bold text-lg mb-4 text-gray-800">Bases e seus Complementos</h4>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"><div class="w-24 text-center py-2 bg-red-100 text-red-800 rounded-full font-semibold">Adenina</div> <span class="font-bold text-indigo-500">&harr;</span> <div class="w-24 text-center py-2 bg-yellow-100 text-yellow-800 rounded-full font-semibold">Timina</div> <span class="text-xs text-gray-500">(DNA)</span></div>
+                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"><div class="w-24 text-center py-2 bg-red-100 text-red-800 rounded-full font-semibold">Adenina</div> <span class="font-bold text-indigo-500">&harr;</span> <div class="w-24 text-center py-2 bg-pink-100 text-pink-800 rounded-full font-semibold">Uracila</div> <span class="text-xs text-gray-500">(RNA)</span></div>
+                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"><div class="w-24 text-center py-2 bg-green-100 text-green-800 rounded-full font-semibold">Guanina</div> <span class="font-bold text-indigo-500">&harr;</span> <div class="w-24 text-center py-2 bg-blue-100 text-blue-800 rounded-full font-semibold">Citosina</div></div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-bold text-lg mb-4 text-gray-800">Classificação das Bases</h4>
+                        <div class="space-y-4 text-sm">
+                           <div class="p-3 bg-gray-50 rounded-lg">
+                               <h5 class="font-semibold mb-2 text-gray-700">Purinas (Anel Duplo)</h5>
+                               <div class="flex gap-2"><div class="py-1 px-3 bg-red-100 text-red-800 rounded-full">Adenina (A)</div><div class="py-1 px-3 bg-green-100 text-green-800 rounded-full">Guanina (G)</div></div>
+                           </div>
+                           <div class="p-3 bg-gray-50 rounded-lg">
+                               <h5 class="font-semibold mb-2 text-gray-700">Pirimidinas (Anel Simples)</h5>
+                               <div class="flex flex-wrap gap-2"><div class="py-1 px-3 bg-blue-100 text-blue-800 rounded-full">Citosina (C)</div><div class="py-1 px-3 bg-yellow-100 text-yellow-800 rounded-full">Timina (T)</div><div class="py-1 px-3 bg-pink-100 text-pink-800 rounded-full">Uracila (U)</div></div>
+                           </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-4 text-gray-800">Composição dos Ácidos Nucleicos</h4>
+                         <div class="p-4 bg-gray-50 rounded-lg space-y-3 text-sm">
+                            <div class="flex items-center gap-3">
+                                <span class="font-semibold w-12">DNA:</span> 
+                                <div class="h-8 w-8 flex items-center justify-center font-bold bg-red-100 text-red-800 rounded-full">A</div>
+                                <div class="h-8 w-8 flex items-center justify-center font-bold bg-yellow-100 text-yellow-800 rounded-full">T</div>
+                                <div class="h-8 w-8 flex items-center justify-center font-bold bg-green-100 text-green-800 rounded-full">G</div>
+                                <div class="h-8 w-8 flex items-center justify-center font-bold bg-blue-100 text-blue-800 rounded-full">C</div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-semibold w-12">RNA:</span> 
+                                <div class="h-8 w-8 flex items-center justify-center font-bold bg-red-100 text-red-800 rounded-full">A</div>
+                                <div class="h-8 w-8 flex items-center justify-center font-bold bg-pink-100 text-pink-800 rounded-full">U</div>
+                                <div class="h-8 w-8 flex items-center justify-center font-bold bg-green-100 text-green-800 rounded-full">G</div>
+                                <div class="h-8 w-8 flex items-center justify-center font-bold bg-blue-100 text-blue-800 rounded-full">C</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+            },
+
+            renderAminoTable() {
+                this.updateTableNav('amino');
+                const bases = ['U', 'C', 'A', 'G'];
+                const groupColors = {
+                    'Apolar': 'bg-yellow-100 text-yellow-800', 'Polar': 'bg-green-100 text-green-800',
+                    'Básico': 'bg-blue-100 text-blue-800', 'Ácido': 'bg-red-100 text-red-800',
+                    'Parada': 'bg-gray-200 text-gray-800',
+                };
+                const legendHTML = `
+            <div class="mb-6">
+                <h4 class="font-bold text-lg mb-3 text-gray-800">Legenda de Grupos</h4>
+                <div class="flex flex-wrap gap-3 text-sm">
+                    <span class="py-1 px-3 rounded-full ${groupColors.Apolar}">Apolar</span>
+                    <span class="py-1 px-3 rounded-full ${groupColors.Polar}">Polar</span>
+                    <span class="py-1 px-3 rounded-full ${groupColors.Básico}">Básico</span>
+                    <span class="py-1 px-3 rounded-full ${groupColors.Ácido}">Ácido</span>
+                    <span class="py-1 px-3 rounded-full ${groupColors.Parada}">Parada</span>
+                </div>
+            </div>`;
+
+                let tableHTML = `<div class="overflow-x-auto"><div class="grid grid-cols-5 gap-1 text-center font-mono text-xs min-w-[600px]">`;
+                // Header
+                tableHTML += `<div></div>` + bases.map(b => `<div class="font-bold text-lg p-2">${b}</div>`).join('');
+
+                bases.forEach(firstBase => {
+                    tableHTML += `<div class="font-bold text-lg p-2 my-auto">${firstBase}</div>`; // Side header
+                    bases.forEach(secondBase => {
+                        tableHTML += `<div class="bg-gray-50 p-2 rounded-md space-y-1">`;
+                        bases.forEach(thirdBase => {
+                            const codon = firstBase + secondBase + thirdBase;
+                            const amino = this.codonMap[codon];
+                            tableHTML += `
+                        <div class="flex justify-between items-center text-left ${groupColors[amino.group]} p-1 rounded">
+                            <span class="font-sans font-semibold">${codon}</span>
+                            <span class="font-sans text-xs">${amino.name}</span>
+                        </div>`;
+                        });
+                        tableHTML += `</div>`;
+                    });
+                });
+                tableHTML += `</div></div>`;
+                this.elements.tables.content.innerHTML = legendHTML + tableHTML;
+            }
+        };
+
+        //  Start the application 
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+
+</body>
+
+</html>
